@@ -179,6 +179,27 @@ def api_summary():
     finally:
         connection.close()
 
+@app.errorhandler(Exception)
+def handle_exception(e):
+    """Menampilkan detail error jika terjadi kendala runtime (misal: koneksi DB gagal)."""
+    return f"""
+    <div style="font-family: sans-serif; padding: 25px; max-width: 750px; margin: 40px auto; border: 1px solid #f87171; border-radius: 10px; background: #fef2f2; color: #1f2937; line-height: 1.5;">
+        <h2 style="color: #dc2626; margin-top: 0;">Terjadi Kendala pada Modul Flask (Python)</h2>
+        <p><strong>Pesan Error:</strong> <span style="color: #b91c1c; font-family: monospace;">{str(e)}</span></p>
+        <hr style="border: none; border-top: 1px solid #fca5a5; margin: 20px 0;">
+        <p style="font-size: 14px; color: #4b5563;">
+            <strong>Pengaturan Database Aktif Saat Ini:</strong><br>
+            • Host: <code>{app.config.get('DB_HOST')}</code><br>
+            • Port: <code>{app.config.get('DB_PORT')}</code><br>
+            • Database: <code>{app.config.get('DB_NAME')}</code><br>
+            • User: <code>{app.config.get('DB_USER')}</code><br>
+        </p>
+        <p style="font-size: 13px; color: #6b7280;">
+            Pastikan data di atas sudah sama dengan database cPanel Anda pada file <code>.env</code> atau <code>config.py</code>.
+        </p>
+    </div>
+    """, 500
+
 if __name__ == '__main__':
     # Jalankan server development Flask pada port 5000
     app.run(host='127.0.0.1', port=5000, debug=True)
