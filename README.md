@@ -1,58 +1,200 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Sistem Modul Surat Perintah Kerja Operator (SPKO) ERP
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Sistem informasi manufaktur terintegrasi untuk pengelolaan **Surat Perintah Kerja Operator (SPKO / Work Allocation)** dan **Nota Terima Hasil Kerja Operator (NTHKO / Work Completion)**. dengan kombinasi teknologi **Laravel (PHP 8.3+)**, **MySQL**, **jQuery**, serta modul analitik terpisah berbasis **Python Flask & Jinja2**.
 
-## About Laravel
+---
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+## 📋 Daftar Isi
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+1. [Fitur Utama & Pemetaan Soal](#-fitur-utama--pemetaan-soal)
+2. [Prasyarat Sistem](#-prasyarat-sistem)
+3. [Panduan Instalasi & Menjalankan Aplikasi](#-panduan-instalasi--menjalankan-aplikasi)
+    - [Setup Database MySQL](#1-setup-database-mysql)
+    - [Menjalankan Aplikasi Laravel](#2-menjalankan-aplikasi-laravel)
+    - [Menjalankan Modul Python Flask](#3-menjalankan-modul-python-flask)
+4. [Pengujian Otomatis (Automated Testing)](#-pengujian-otomatis-automated-testing)
+5. [Struktur Database & Relasi](#-struktur-database--relasi)
+6. [Panduan Demonstrasi Teknis (Sesi Zoom Meeting)](#-panduan-demonstrasi-teknis-sesi-zoom-meeting)
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+---
 
-## Learning Laravel
+## 🚀 Fitur Utama & Pemetaan Soal
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+| No      | Modul / Soal                           | Deskripsi Implementasi                                                                                                                                                                                                                                                                                                                                                                                                                                                                      | Stack Teknologi                                 |
+| ------- | -------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------- |
+| **1**   | **Database & Migrasi (30 Poin)**       | Pembuatan skema database `database_erp`, 6 tabel inti, relasi _foreign keys_, _composite primary keys_, model Eloquent, dan _seeder_ data awal.                                                                                                                                                                                                                                                                                                                                             | Laravel Migrations, MySQL, Eloquent Models      |
+| **1.a** | Tabel `employee`                       | Master data operator (`Id_employee`, `entry_date`, `nama`, `rank`, `gender`).                                                                                                                                                                                                                                                                                                                                                                                                               | Laravel Migration & Seeder                      |
+| **1.b** | Tabel `product`                        | Master data perhiasan (`Id_product`, `sub_category`, `serial_no`, `description`, `carat`, SKU accessor).                                                                                                                                                                                                                                                                                                                                                                                    | Laravel Migration & Seeder                      |
+| **1.c** | Tabel `workallocation`                 | Header Surat Perintah Kerja Operator (`ID`, `Remarks`, `Employee`, `TransDate`, `Process`, `SW`).                                                                                                                                                                                                                                                                                                                                                                                           | Laravel Migration & Seeder                      |
+| **1.d** | Tabel `workallocationitem`             | Detail item SPKO (`IDM`, `Ordinal`, `Qty`, `Weight`, `FG`).                                                                                                                                                                                                                                                                                                                                                                                                                                 | Composite PK (`IDM`, `Ordinal`)                 |
+| **1.e** | Tabel `workcompletion`                 | Header Nota Terima Kerja (`ID`, `Remarks`, `Employee`, `TransDate`, `Process`, `WorkAllocation`).                                                                                                                                                                                                                                                                                                                                                                                           | Laravel Migration & Seeder                      |
+| **1.f** | Tabel `workcompletionitem`             | Detail item serah terima NTHKO (`IDM`, `Ordinal`, `Qty`, `Weight`, `LinkID`, `LinkOrd`, `FG`).                                                                                                                                                                                                                                                                                                                                                                                              | Composite PK & Foreign Key Reference            |
+| **2**   | **Modul CRUD & Cetak SPKO (70 Poin)**  | - **Create**: Pembuatan transaksi SPKO + otomatis membuat Nota Terima Kerja (workcompletion) dengan format penomoran unik `SPKO2204001` (Tahun, Bulan, Nomor Urut). Input multi-produk dinamis dengan jQuery.<br>- **Update**: Mengubah jumlah Qty item, mengganti tanggal transaksi, dan mengganti operator secara atomik.<br>- **Delete**: Menghapus transaksi SPKO beserta nota terima kerja terkait.<br>- **Print**: Tampilan cetak resmi 1:1 sesuai spesifikasi halaman 4 dokumen PDF. | Laravel Controller, Blade, Tailwind CSS, jQuery |
+| **3**   | **Laporan Harian Raw Query (10 Poin)** | Laporan rekapitulasi komparasi harian SPKO dan NTHKO yang **100% menggunakan Raw SQL Query murni (`DB::select`) tanpa Eloquent ORM**.                                                                                                                                                                                                                                                                                                                                                       | Raw SQL, MySQL, Laravel Controller              |
+| **4**   | **Modul Python Flask (20 Poin)**       | Aplikasi analitik terpisah menggunakan Python Flask dan Jinja2 untuk menghitung selisih berat (_shrinkage_ / susut emas) per produk FG antara SPKO dan NTHKO.                                                                                                                                                                                                                                                                                                                               | Python 3.10, Flask 3.1, Jinja2, PyMySQL         |
+| **5**   | **Demonstrasi & Repositori**           | Dokumentasi lengkap alur kerja, git commit terstruktur per nomor soal, dan instruksi demonstrasi Zoom.                                                                                                                                                                                                                                                                                                                                                                                      | Git, Markdown, README                           |
 
-In addition, [Laracasts](https://laracasts.com) contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+---
 
-You can also watch bite-sized lessons with real-world projects on [Laravel Learn](https://laravel.com/learn), where you will be guided through building a Laravel application from scratch while learning PHP fundamentals.
+## 💻 Prasyarat Sistem
 
-## Agentic Development
+- **PHP**: Versi 8.2 atau 8.3+ (CLI & Web)
+- **Composer**: Versi 2.x
+- **MySQL / MariaDB**: Port default 3306 (misalnya via XAMPP / Laragon)
+- **Python**: Versi 3.8+ (direkomendasikan Python 3.10+)
+- **Git**: Untuk manajemen repositori
 
-Laravel's predictable structure and conventions make it ideal for AI coding agents like Claude Code, Cursor, and GitHub Copilot. Install [Laravel Boost](https://laravel.com/docs/ai) to supercharge your AI workflow:
+---
 
-```bash
-composer require laravel/boost --dev
+## 🛠️ Panduan Instalasi & Menjalankan Aplikasi
 
-php artisan boost:install
+### 1. Setup Database MySQL
+
+Pastikan service MySQL aktif, lalu buat database:
+
+```sql
+CREATE DATABASE database_erp CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 ```
 
-Boost provides your agent 15+ tools and skills that help agents build Laravel applications while following best practices.
+### 2. Menjalankan Aplikasi Laravel
 
-## Contributing
+1. Buka terminal pada folder proyek:
+    ```bash
+    cd c:\xampp\htdocs\surat_perintah_kerja_operator-SPKO-
+    ```
+2. Salin environment file jika belum ada:
+    ```bash
+    copy .env.example .env
+    ```
+3. Pastikan konfigurasi database di file `.env` sudah sesuai:
+    ```env
+    DB_CONNECTION=mysql
+    DB_HOST=127.0.0.1
+    DB_PORT=3306
+    DB_DATABASE=database_erp
+    DB_USERNAME=root
+    DB_PASSWORD=
+    ```
+4. Jalankan migrasi dan seeder awal data Soal 1:
+    ```bash
+    php artisan migrate:fresh --seed
+    ```
+5. Jalankan server Laravel:
+    ```bash
+    php artisan serve --port=8000
+    ```
+6. Akses melalui browser:
+    - **Dashboard SPKO (CRUD & Cetak)**: [http://127.0.0.1:8000/spko](http://127.0.0.1:8000/spko)
+    - **Laporan Harian Raw Query (Soal 3)**: [http://127.0.0.1:8000/reports/daily-spko-nthko](http://127.0.0.1:8000/reports/daily-spko-nthko)
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+---
 
-## Code of Conduct
+### 3. Menjalankan Modul Python Flask (Soal 4)
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+1. Buka terminal baru dan masuk ke folder `python_flask`:
+    ```bash
+    cd c:\xampp\htdocs\surat_perintah_kerja_operator-SPKO-\python_flask
+    ```
+2. Pasang dependensi yang dibutuhkan:
+    ```bash
+    pip install -r requirements.txt
+    ```
+3. Jalankan aplikasi Flask:
+    ```bash
+    python app.py
+    ```
+4. Akses melalui browser:
+    - **Modul Selisih Berat FG (Flask & Jinja2)**: [http://127.0.0.1:5000](http://127.0.0.1:5000)
+    - **Rincian Transaksi Produk FG**: [http://127.0.0.1:5000/detail/128409](http://127.0.0.1:5000/detail/128409)
 
-## Security Vulnerabilities
+---
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+## 🧪 Pengujian Otomatis (Automated Testing)
 
-## License
+### Pengujian Fitur Laravel (PHPUnit)
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+Memvalidasi seluruh alur Create, Read, Update, Delete, Print, dan Raw Query:
+
+```bash
+php artisan test
+```
+
+_Hasil: Seluruh pengujian lulus (Passed)._
+
+### Pengujian Modul Python Flask (Unittest)
+
+Memvalidasi rendering Jinja2, kalkulasi selisih berat FG, dan penanganan error 404:
+
+```bash
+cd python_flask
+python -m unittest test_app.py
+```
+
+_Hasil: Seluruh 4 pengujian lulus (OK)._
+
+---
+
+## 🗄️ Struktur Database & Relasi
+
+```mermaid
+erDiagram
+    employee ||--o{ workallocation : "Operator penanggung jawab"
+    employee ||--o{ workcompletion : "Operator penerima"
+    product ||--o{ workallocationitem : "Produk FG dialokasikan"
+    product ||--o{ workcompletionitem : "Produk FG diserahterimakan"
+    workallocation ||--|{ workallocationitem : "Header memiliki item"
+    workcompletion ||--|{ workcompletionitem : "Header memiliki item"
+    workallocationitem ||--o| workcompletionitem : "Tersinkronisasi via LinkID & LinkOrd"
+
+    employee {
+        int Id_employee PK
+        timestamp entry_date
+        varchar nama
+        varchar rank
+        char gender
+    }
+
+    product {
+        int Id_product PK
+        varchar sub_category
+        int serial_no
+        varchar description
+        varchar carat
+    }
+
+    workallocation {
+        bigint ID PK
+        varchar SW
+        date TransDate
+        int Employee FK
+        varchar Process
+        text Remarks
+    }
+
+    workallocationitem {
+        bigint IDM PK,FK
+        int Ordinal PK
+        int Qty
+        decimal Weight
+        int FG FK
+    }
+
+    workcompletion {
+        bigint ID PK
+        varchar WorkAllocation
+        date TransDate
+        int Employee FK
+        varchar Process
+        text Remarks
+    }
+
+    workcompletionitem {
+        bigint IDM PK,FK
+        int Ordinal PK
+        int Qty
+        decimal Weight
+        bigint LinkID FK
+        int LinkOrd FK
+        int FG FK
+    }
+```
