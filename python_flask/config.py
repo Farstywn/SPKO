@@ -27,5 +27,5 @@ class Config:
     DB_PORT = int(os.getenv('DB_PORT', 3306))
     DB_USER = os.getenv('DB_USERNAME', 'root')
     DB_PASSWORD = os.getenv('DB_PASSWORD', '')
-    DB_NAME = os.getenv('DB_DATABASE', 'db_spko')
+    DB_NAME = os.getenv('DB_DATABASE', 'database_erp')
     SECRET_KEY = os.getenv('SECRET_KEY', 'spko-2026')
