@@ -34,16 +34,7 @@
                 >
                     <option value="">-- Semua Kategori --</option>
                     {% for cat in categories %}
-                    <option
-                        value="{{ cat }}"
-                        {%
-                        if
-                        selected_category=""
-                        ="cat"
-                        %}selected{%
-                        endif
-                        %}
-                    >
+                    <option value="{{ cat }}" {% if selected_category == cat %}selected{% endif %}>
                         {{ cat }}
                     </option>
                     {% endfor %}
