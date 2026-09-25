@@ -34,14 +34,9 @@
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
                 <!-- No SPKO -->
                 <div>
-                    <div class="flex items-center justify-between mb-1.5">
-                        <label class="block text-xs font-semibold text-slate-700">
-                            Nomor SPKO <span class="text-rose-500">*</span>
-                        </label>
-                        <span class="inline-flex items-center gap-1 text-[10px] font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
-                            <i class="fa-solid fa-shield-halved text-[9px]"></i> Anti-Duplikat
-                        </span>
-                    </div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1.5">
+                        Nomor SPKO <span class="text-rose-500">*</span>
+                    </label>
                     <div class="relative">
                         <input type="text" name="spko_no" id="spko_no" value="{{ old('spko_no', $suggestedSpkoNo) }}" required
                             class="w-full pl-3.5 pr-10 py-2.5 rounded-xl border border-slate-300 text-sm font-mono font-medium focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-600 bg-slate-50/50">
@@ -50,10 +45,7 @@
                             <i class="fa-solid fa-arrows-rotate text-xs" id="iconRefreshSpko"></i>
                         </button>
                     </div>
-                    <span class="text-[11px] text-slate-400 mt-1 flex items-center gap-1">
-                        <i class="fa-solid fa-circle-info text-[10px] text-slate-400"></i>
-                        Otomatis diamankan saat simpan agar tidak bentrok jika operator lain input bersamaan.
-                    </span>
+                    <span class="text-[11px] text-slate-400 mt-1 block">Format: SPKO{yy}{mm}{001} unik</span>
                 </div>
 
                 <!-- Tanggal Transaksi -->
