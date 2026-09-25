@@ -1,6 +1,8 @@
 @extends('layouts.app')
 
 @section('title', 'Laporan Informasi Harian SPKO & NTHKO (Raw Query)')
+@section('breadcrumb', 'LAPORAN & ANALITIK / INFORMASI HARIAN')
+@section('page_title', 'Laporan Harian SPKO vs NTHKO')
 
 @section('content')
 <div class="space-y-6">

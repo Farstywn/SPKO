@@ -179,9 +179,13 @@ def api_summary():
     finally:
         connection.close()
 
+from werkzeug.exceptions import HTTPException
+
 @app.errorhandler(Exception)
 def handle_exception(e):
     """Menampilkan detail error jika terjadi kendala runtime (misal: koneksi DB gagal)."""
+    if isinstance(e, HTTPException):
+        return e
     return f"""
     <div style="font-family: sans-serif; padding: 25px; max-width: 750px; margin: 40px auto; border: 1px solid #f87171; border-radius: 10px; background: #fef2f2; color: #1f2937; line-height: 1.5;">
         <h2 style="color: #dc2626; margin-top: 0;">Terjadi Kendala pada Modul Flask (Python)</h2>

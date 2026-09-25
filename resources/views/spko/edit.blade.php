@@ -1,6 +1,8 @@
 @extends('layouts.app')
 
 @section('title', 'Edit Transaksi SPKO ' . $allocation->SW)
+@section('breadcrumb', 'TRANSAKSI / SPKO / EDIT')
+@section('page_title', 'Edit Transaksi SPKO')
 
 @section('content')
 <div class="w-full space-y-6">

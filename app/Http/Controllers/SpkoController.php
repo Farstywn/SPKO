@@ -17,15 +17,35 @@ class SpkoController extends Controller
     /**
      * Tampilkan daftar transaksi SPKO (Work Allocation).
      */
-    public function index()
+    public function index(Request $request)
     {
-        $allocations = WorkAllocation::with(['employee', 'items.product', 'workCompletion'])
-            ->orderBy('TransDate', 'desc')
-            ->orderBy('ID', 'desc')
-            ->paginate(15);
+        $search = $request->query('search');
+        $process = $request->query('process');
 
-        return view('spko.index', compact('allocations'));
+        $query = WorkAllocation::with(['employee', 'items.product', 'workCompletion']);
+
+        if (!empty($search)) {
+            $query->where(function ($q) use ($search) {
+                $q->where('SW', 'like', "%{$search}%")
+                  ->orWhere('ID', 'like', "%{$search}%")
+                  ->orWhereHas('employee', function ($eq) use ($search) {
+                      $eq->where('nama', 'like', "%{$search}%");
+                  });
+            });
+        }
+
+        if (!empty($process)) {
+            $query->where('Process', $process);
+        }
+
+        $allocations = $query->orderBy('TransDate', 'desc')
+            ->orderBy('ID', 'desc')
+            ->paginate(15)
+            ->withQueryString();
+
+        return view('spko.index', compact('allocations', 'search', 'process'));
     }
+
 
     /**
      * Form pembuatan SPKO dan Nota Terima Kerja baru.

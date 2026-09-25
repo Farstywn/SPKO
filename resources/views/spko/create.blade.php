@@ -1,6 +1,8 @@
 @extends('layouts.app')
 
 @section('title', 'Buat Surat Perintah Kerja Operator (SPKO) Baru')
+@section('breadcrumb', 'TRANSAKSI / SPKO / FORMULIR')
+@section('page_title', 'Buat SPKO Baru')
 
 @section('content')
 <div class="w-full space-y-6">
