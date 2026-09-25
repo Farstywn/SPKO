@@ -117,13 +117,10 @@
     <aside id="sidebar" class="fixed inset-y-0 left-0 z-50 w-64 bg-white border-r border-slate-200 flex flex-col transform -translate-x-full md:translate-x-0 transition-transform duration-200 ease-in-out">
         <!-- Brand Header -->
         <div class="h-16 px-6 border-b border-slate-100 flex items-center justify-between">
-            <a href="{{ route('dashboard') }}" class="flex items-center gap-3 group">
-                <div class="w-9 h-9 rounded-xl bg-slate-900 flex items-center justify-center text-white shadow-sm group-hover:bg-emerald-600 transition">
-                    <i class="fa-solid fa-cubes text-sm"></i>
-                </div>
+            <a href="{{ route('dashboard') }}" class="flex items-center group">
                 <div>
-                    <span class="text-base font-bold text-slate-900 tracking-tight block leading-tight">IPM System</span>
-                    <span class="text-[10px] font-semibold tracking-wider text-slate-400 uppercase">SPKO & ERP Module</span>
+                    <span class="text-base font-bold text-slate-900 tracking-tight block leading-tight">SPKO</span>
+                    <span class="text-[10px] font-semibold tracking-wider text-slate-400 uppercase">Surat Perintah Kerja Operator</span>
                 </div>
             </a>
             <button id="sidebar-close-btn" class="md:hidden text-slate-400 hover:text-slate-600 p-1">
@@ -136,8 +133,8 @@
 
             <!-- Dashboard -->
             <a href="{{ route('dashboard') }}" 
-               class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium transition {{ request()->routeIs('dashboard') ? 'bg-slate-900 text-white shadow-sm' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100' }}">
-                <i class="fa-solid fa-house w-5 text-center text-sm {{ request()->routeIs('dashboard') ? 'text-emerald-400' : 'text-slate-400' }}"></i>
+               class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium transition {{ request()->routeIs('dashboard') ? 'bg-emerald-50 text-emerald-800 font-semibold' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100' }}">
+                <i class="fa-solid fa-house w-5 text-center text-sm {{ request()->routeIs('dashboard') ? 'text-emerald-600 font-semibold' : 'text-slate-400' }}"></i>
                 <span>Dashboard</span>
             </a>
 
@@ -157,11 +154,11 @@
                 </button>
                 <div id="menu-master" class="menu-subitems pl-8 pr-2 space-y-1 {{ $isMasterActive ? '' : 'hidden' }}">
                     <a href="{{ route('master.employee') }}" 
-                       class="block px-3 py-2 rounded-lg text-xs font-medium transition {{ request()->routeIs('master.employee') ? 'bg-emerald-50 text-emerald-800 font-semibold border-l-2 border-emerald-600' : 'text-slate-500 hover:text-slate-800 hover:bg-slate-50' }}">
+                       class="block px-3 py-2 rounded-lg text-xs font-medium transition {{ request()->routeIs('master.employee') ? 'bg-emerald-50 text-emerald-800 font-semibold' : 'text-slate-500 hover:text-slate-800 hover:bg-slate-50' }}">
                         Operator (Employee)
                     </a>
                     <a href="{{ route('master.product') }}" 
-                       class="block px-3 py-2 rounded-lg text-xs font-medium transition {{ request()->routeIs('master.product') ? 'bg-emerald-50 text-emerald-800 font-semibold border-l-2 border-emerald-600' : 'text-slate-500 hover:text-slate-800 hover:bg-slate-50' }}">
+                       class="block px-3 py-2 rounded-lg text-xs font-medium transition {{ request()->routeIs('master.product') ? 'bg-emerald-50 text-emerald-800 font-semibold' : 'text-slate-500 hover:text-slate-800 hover:bg-slate-50' }}">
                         Produk (FG)
                     </a>
                 </div>
@@ -183,15 +180,15 @@
                 </button>
                 <div id="menu-transaksi" class="menu-subitems pl-8 pr-2 space-y-1 {{ $isTransaksiActive ? '' : 'hidden' }}">
                     <a href="{{ route('spko.index') }}" 
-                       class="block px-3 py-2 rounded-lg text-xs font-medium transition {{ request()->routeIs('spko.index', 'spko.show', 'spko.edit') ? 'bg-emerald-50 text-emerald-800 font-semibold border-l-2 border-emerald-600' : 'text-slate-500 hover:text-slate-800 hover:bg-slate-50' }}">
+                       class="block px-3 py-2 rounded-lg text-xs font-medium transition {{ request()->routeIs('spko.index', 'spko.show', 'spko.edit') ? 'bg-emerald-50 text-emerald-800 font-semibold' : 'text-slate-500 hover:text-slate-800 hover:bg-slate-50' }}">
                         Daftar SPKO
                     </a>
                     <a href="{{ route('spko.create') }}" 
-                       class="block px-3 py-2 rounded-lg text-xs font-medium transition {{ request()->routeIs('spko.create') ? 'bg-emerald-50 text-emerald-800 font-semibold border-l-2 border-emerald-600' : 'text-slate-500 hover:text-slate-800 hover:bg-slate-50' }}">
+                       class="block px-3 py-2 rounded-lg text-xs font-medium transition {{ request()->routeIs('spko.create') ? 'bg-emerald-50 text-emerald-800 font-semibold' : 'text-slate-500 hover:text-slate-800 hover:bg-slate-50' }}">
                         Buat SPKO Baru
                     </a>
                     <a href="{{ route('nthko.index') }}" 
-                       class="block px-3 py-2 rounded-lg text-xs font-medium transition {{ request()->routeIs('nthko.index') ? 'bg-emerald-50 text-emerald-800 font-semibold border-l-2 border-emerald-600' : 'text-slate-500 hover:text-slate-800 hover:bg-slate-50' }}">
+                       class="block px-3 py-2 rounded-lg text-xs font-medium transition {{ request()->routeIs('nthko.index') ? 'bg-emerald-50 text-emerald-800 font-semibold' : 'text-slate-500 hover:text-slate-800 hover:bg-slate-50' }}">
                         Nota Terima Kerja (NTHKO)
                     </a>
                 </div>
@@ -213,7 +210,7 @@
                 </button>
                 <div id="menu-laporan" class="menu-subitems pl-8 pr-2 space-y-1 {{ $isReportActive ? '' : 'hidden' }}">
                     <a href="{{ route('reports.daily') }}" 
-                       class="block px-3 py-2 rounded-lg text-xs font-medium transition {{ request()->routeIs('reports.daily') ? 'bg-indigo-50 text-indigo-800 font-semibold border-l-2 border-indigo-600' : 'text-slate-500 hover:text-slate-800 hover:bg-slate-50' }}">
+                       class="block px-3 py-2 rounded-lg text-xs font-medium transition {{ request()->routeIs('reports.daily') ? 'bg-indigo-50 text-indigo-800 font-semibold' : 'text-slate-500 hover:text-slate-800 hover:bg-slate-50' }}">
                         Laporan Harian (Raw SQL)
                     </a>
                     <a href="{{ env('FLASK_URL', 'http://127.0.0.1:5000') }}" target="_blank" 
@@ -257,24 +254,6 @@
                     <div class="text-base font-bold text-slate-900 leading-tight">
                         @yield('page_title', 'Surat Perintah Kerja Operator')
                     </div>
-                </div>
-            </div>
-
-            <!-- Right Controls: Notification & User Pill Profile -->
-            <div class="flex items-center gap-3">
-                <!-- Notification Bell -->
-                <a href="{{ route('spko.index') }}" title="Notifikasi Transaksi" class="relative w-9 h-9 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-600 flex items-center justify-center transition">
-                    <i class="fa-regular fa-bell text-sm"></i>
-                    <span class="absolute top-1 right-1 w-2 h-2 rounded-full bg-rose-500 ring-2 ring-white"></span>
-                </a>
-
-                <!-- User Profile Pill -->
-                <div class="flex items-center gap-2 bg-slate-900 text-white pl-2 pr-3 py-1.5 rounded-full shadow-xs cursor-pointer hover:bg-slate-800 transition">
-                    <div class="w-6 h-6 rounded-full bg-slate-700 flex items-center justify-center text-[11px] font-bold text-slate-200">
-                        A
-                    </div>
-                    <span class="text-xs font-semibold tracking-wide">ADMINISTRATOR</span>
-                    <i class="fa-solid fa-chevron-down text-[10px] text-slate-400 ml-0.5"></i>
                 </div>
             </div>
         </header>
@@ -322,7 +301,7 @@
         <!-- Footer -->
         <footer class="bg-white border-t border-slate-200/80 py-4 px-8 text-xs text-slate-500 mt-auto">
             <div class="flex flex-col sm:flex-row justify-between items-center gap-2">
-                <span>&copy; {{ date('Y') }} IPM System - Modul SPKO & Transaksi Operator</span>
+                <span>&copy; {{ date('Y') }} SPKO - Modul Surat Perintah Kerja Operator</span>
                 <span class="text-slate-400">Database ERP Manufaktur</span>
             </div>
         </footer>
