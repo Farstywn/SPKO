@@ -113,7 +113,7 @@
                     <a href="{{ route('reports.daily') }}" class="px-3.5 py-2 rounded-lg text-sm font-medium transition {{ request()->routeIs('reports.daily') ? 'bg-indigo-50 text-indigo-700 font-semibold' : 'text-slate-600 hover:text-indigo-600 hover:bg-indigo-50/50' }}">
                         Laporan Harian (Raw SQL)
                     </a>
-                    <a href="http://127.0.0.1:5000" target="_blank" class="px-3.5 py-2 rounded-lg text-sm font-medium text-amber-700 bg-amber-50 hover:bg-amber-100 border border-amber-200 transition">
+                    <a href="{{ env('FLASK_URL', 'http://127.0.0.1:5000') }}" target="_blank" class="px-3.5 py-2 rounded-lg text-sm font-medium text-amber-700 bg-amber-50 hover:bg-amber-100 border border-amber-200 transition">
                         Modul Flask (Python)
                     </a>
                 </nav>
