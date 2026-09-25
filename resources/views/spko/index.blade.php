@@ -5,71 +5,74 @@
 @section('page_title', 'Daftar Transaksi SPKO')
 
 @section('content')
-<div class="space-y-6">
+<div class="space-y-5">
 
-    <!-- Header & Search Toolbar Card -->
-    <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-xs">
-        <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">
-            <div>
-                <h1 class="text-xl font-bold text-slate-900 tracking-tight flex items-center gap-2">
-                    <span>Daftar Transaksi SPKO</span>
-                    <span class="text-xs font-semibold px-2.5 py-1 rounded-full bg-slate-100 text-slate-700">
-                        {{ $allocations->total() }} Data
-                    </span>
-                </h1>
-                <p class="text-xs text-slate-500 mt-1">
-                    Kelola transaksi Surat Perintah Kerja Operator (workallocation) dan Nota Terima Kerja (workcompletion).
-                </p>
-            </div>
-
-            <!-- Filters & Actions -->
-            <div class="w-full lg:w-auto flex flex-wrap items-center gap-2">
-                <!-- Search & Filter Form -->
-                <form action="{{ route('spko.index') }}" method="GET" class="flex flex-wrap items-center gap-2 grow sm:grow-0">
-                    <!-- Process Filter -->
-                    <div class="w-36">
-                        <select name="process" onchange="this.form.submit()" class="w-full px-3 py-2 text-xs rounded-xl border border-slate-200 bg-slate-50/50 focus:outline-none focus:border-emerald-500">
-                            <option value="">Semua Proses</option>
-                            @foreach(['Cor', 'Brush', 'Bombing', 'Slep'] as $proc)
-                                <option value="{{ $proc }}" {{ ($process ?? '') == $proc ? 'selected' : '' }}>
-                                    {{ $proc }}
-                                </option>
-                            @endforeach
-                        </select>
-                    </div>
-
-                    <!-- Search Input -->
-                    <div class="relative w-full sm:w-56">
-                        <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
-                        <input type="text" 
-                               name="search" 
-                               value="{{ $search ?? '' }}" 
-                               placeholder="Cari no. SPKO, operator..." 
-                               class="w-full pl-9 pr-3.5 py-2 text-xs rounded-xl border border-slate-200 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 bg-slate-50/50">
-                    </div>
-
-                    <button type="submit" class="px-3.5 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold shadow-xs transition">
-                        Cari
-                    </button>
-
-                    @if(!empty($search) || !empty($process))
-                        <a href="{{ route('spko.index') }}" class="px-3 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 text-xs font-medium transition" title="Reset Filter">
-                            Reset
-                        </a>
-                    @endif
-                </form>
-
-                <!-- Add Button -->
-                <a href="{{ route('spko.create') }}" class="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs shadow-xs transition">
-                    <i class="fa-solid fa-plus"></i>
-                    <span>Tambah Transaksi SPKO</span>
-                </a>
-            </div>
+    <!-- Page Subheader -->
+    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+        <div>
+            <h1 class="text-xl font-bold text-slate-900 tracking-tight flex items-center gap-2">
+                <span>Daftar Transaksi SPKO</span>
+                <span class="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-slate-200/70 text-slate-700">
+                    {{ $allocations->total() }} Data
+                </span>
+            </h1>
+            <p class="text-xs text-slate-500 mt-0.5">
+                Kelola transaksi Surat Perintah Kerja Operator (workallocation) dan Nota Terima Kerja (workcompletion).
+            </p>
         </div>
     </div>
 
-    <!-- Table Card -->
+    <!-- Main Table Card with Integrated Toolbar -->
     <div class="bg-white rounded-2xl border border-slate-200 shadow-xs overflow-hidden">
+        
+        <!-- Toolbar Bar: Filter on Left, Add Button on Far Right -->
+        <div class="p-5 border-b border-slate-100 flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4">
+            <!-- Left: Search & Filter Form -->
+            <form action="{{ route('spko.index') }}" method="GET" class="flex flex-wrap sm:flex-nowrap items-center gap-2.5 flex-1 max-w-2xl">
+                <!-- Search Input -->
+                <div class="relative flex-1 min-w-[200px]">
+                    <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
+                    <input type="text" 
+                           name="search" 
+                           value="{{ $search ?? '' }}" 
+                           placeholder="Cari no. SPKO, operator..." 
+                           class="w-full pl-9 pr-3.5 py-2.5 text-xs rounded-xl border border-slate-200 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 bg-slate-50/50 text-slate-800 placeholder:text-slate-400">
+                </div>
+
+                <!-- Process Filter Select -->
+                <div class="w-40 shrink-0">
+                    <select name="process" onchange="this.form.submit()" class="w-full px-3 py-2.5 text-xs rounded-xl border border-slate-200 bg-slate-50/50 text-slate-700 focus:outline-none focus:border-emerald-500">
+                        <option value="">Semua Proses</option>
+                        @foreach(['Cor', 'Brush', 'Bombing', 'Slep'] as $proc)
+                            <option value="{{ $proc }}" {{ ($process ?? '') == $proc ? 'selected' : '' }}>
+                                {{ $proc }}
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
+
+                <!-- Cari Button -->
+                <button type="submit" class="px-4 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold shadow-xs transition shrink-0">
+                    Cari
+                </button>
+
+                @if(!empty($search) || !empty($process))
+                    <a href="{{ route('spko.index') }}" class="px-3.5 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 text-xs font-medium transition shrink-0" title="Reset Filter">
+                        Reset
+                    </a>
+                @endif
+            </form>
+
+            <!-- Right: + Tambah Order SPKO Button -->
+            <div class="shrink-0">
+                <a href="{{ route('spko.create') }}" class="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-semibold text-xs shadow-xs transition w-full sm:w-auto">
+                    <i class="fa-solid fa-plus text-xs"></i>
+                    <span>+ Tambah Order</span>
+                </a>
+            </div>
+        </div>
+
+        <!-- Table Content -->
         <div class="overflow-x-auto">
             <table class="w-full text-left text-sm text-slate-600">
                 <thead class="bg-slate-50/80 border-b border-slate-100 text-[11px] uppercase font-bold text-slate-500 tracking-wider">
