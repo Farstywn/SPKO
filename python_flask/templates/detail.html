@@ -1,5 +1,10 @@
-{% extends "base.html" %} {% block title %}Rincian Transaksi FG {{
-product.Id_product }}{% endblock %} {% block content %}
+{% extends "base.html" %}
+
+{% block title %}Rincian Transaksi FG {{ product.Id_product }}{% endblock %}
+{% block breadcrumb %}LAPORAN & ANALITIK / SELISIH BOBOT FG / RINCIAN{% endblock %}
+{% block page_title %}Rincian Transaksi FG: {{ product.Id_product }}{% endblock %}
+
+{% block content %}
 <div class="w-full space-y-6">
     <!-- Breadcrumb & Title -->
     <div

@@ -222,17 +222,6 @@
             </div>
 
         </div>
-
-        <!-- Sidebar Footer / System Badge -->
-        <div class="p-4 border-t border-slate-100 bg-slate-50/50">
-            <div class="flex items-center gap-3 px-2 py-1.5">
-                <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
-                <div class="text-xs">
-                    <div class="font-semibold text-slate-700">ERP System Online</div>
-                    <div class="text-[10px] text-slate-400">MySQL Database Aktif</div>
-                </div>
-            </div>
-        </div>
     </aside>
 
     <!-- Main Wrapper Area -->

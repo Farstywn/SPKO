@@ -29,3 +29,4 @@ class Config:
     DB_PASSWORD = os.getenv('DB_PASSWORD', '')
     DB_NAME = os.getenv('DB_DATABASE', 'database_erp')
     SECRET_KEY = os.getenv('SECRET_KEY', 'spko-2026')
+    LARAVEL_URL = os.getenv('APP_URL', 'http://127.0.0.1:8000')

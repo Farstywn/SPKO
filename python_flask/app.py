@@ -6,6 +6,10 @@ from config import Config
 app = Flask(__name__)
 app.config.from_object(Config)
 
+@app.context_processor
+def inject_laravel_url():
+    return {'laravel_url': app.config.get('LARAVEL_URL', 'http://127.0.0.1:8000')}
+
 def get_db_connection():
     """Membuka koneksi ke MySQL database_erp."""
     return pymysql.connect(
