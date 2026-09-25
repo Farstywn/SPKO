@@ -15,6 +15,7 @@ Route::prefix('master')->name('master.')->group(function () {
 });
 
 // Modul Transaksi SPKO & Nota Terima Kerja (NTHKO)
+Route::get('spko/suggest-number', [SpkoController::class, 'getSuggestNumber'])->name('spko.suggest_number');
 Route::get('spko/{id}/print', [SpkoController::class, 'print'])->name('spko.print');
 Route::resource('spko', SpkoController::class);
 Route::get('nthko', [MasterDataController::class, 'nthko'])->name('nthko.index');

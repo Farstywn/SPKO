@@ -48,6 +48,20 @@ class SpkoController extends Controller
 
 
     /**
+     * Endpoint API untuk mengecek dan mengambil nomor SPKO berikutnya secara real-time.
+     */
+    public function getSuggestNumber(Request $request)
+    {
+        $date = $request->query('trans_date', now()->toDateString());
+        $suggested = $this->generateSpkoNumber($date);
+
+        return response()->json([
+            'status' => 'success',
+            'suggested_no' => $suggested,
+        ]);
+    }
+
+    /**
      * Form pembuatan SPKO dan Nota Terima Kerja baru.
      */
     public function create()
@@ -62,6 +76,7 @@ class SpkoController extends Controller
 
     /**
      * Simpan SPKO baru beserta Nota Terima Kerja (mengikuti data SPKO).
+     * Dilengkapi atomic concurrency lock untuk mencegah nomor SPKO dan ID duplikat saat multi-user.
      */
     public function store(Request $request)
     {
@@ -77,15 +92,29 @@ class SpkoController extends Controller
             'items.*.weight' => 'nullable|numeric|min:0',
         ]);
 
-        $spkoNo = !empty($validated['spko_no'])
-            ? trim($validated['spko_no'])
-            : $this->generateSpkoNumber($validated['trans_date']);
-
-        $transDate = Carbon::parse($validated['trans_date']);
-        $newId = $this->generateNumericId($transDate);
-
         DB::beginTransaction();
         try {
+            $transDate = Carbon::parse($validated['trans_date']);
+            $newId = $this->generateNumericId($transDate, true);
+
+            $requestedSpkoNo = !empty($validated['spko_no']) ? trim($validated['spko_no']) : null;
+            $wasAutoAllocated = false;
+            $originalRequested = $requestedSpkoNo;
+
+            // Kunci dan periksa apakah nomor SPKO yang diminta sudah digunakan oleh transaksi lain
+            if (!empty($requestedSpkoNo)) {
+                $isTaken = WorkAllocation::where('SW', $requestedSpkoNo)->lockForUpdate()->exists();
+                if ($isTaken) {
+                    // Jika sudah terpakai saat form dibuka bersamaan, alokasikan nomor unik berikutnya secara otomatis
+                    $spkoNo = $this->generateSpkoNumber($validated['trans_date'], true);
+                    $wasAutoAllocated = true;
+                } else {
+                    $spkoNo = $requestedSpkoNo;
+                }
+            } else {
+                $spkoNo = $this->generateSpkoNumber($validated['trans_date'], true);
+            }
+
             // 1. Simpan Surat Perintah Kerja (workallocation)
             $allocation = WorkAllocation::create([
                 'ID'        => $newId,
@@ -146,8 +175,11 @@ class SpkoController extends Controller
 
             DB::commit();
 
-            return redirect()->route('spko.index')
-                ->with('success', "Surat Perintah Kerja {$spkoNo} dan Nota Terima Kerja berhasil dibuat!");
+            $successMsg = $wasAutoAllocated
+                ? "Nomor SPKO '{$originalRequested}' telah digunakan oleh transaksi lain. Sistem secara otomatis menerbitkan nomor baru: {$spkoNo}."
+                : "Surat Perintah Kerja {$spkoNo} dan Nota Terima Kerja berhasil dibuat!";
+
+            return redirect()->route('spko.index')->with('success', $successMsg);
         } catch (\Throwable $e) {
             DB::rollBack();
             return back()->withInput()->with('error', 'Gagal membuat SPKO: ' . $e->getMessage());
@@ -319,41 +351,57 @@ class SpkoController extends Controller
     }
 
     /**
-     * Helper membuat nomor urut SPKO unik berformat 'SPKO2204001'.
-     * Format: 'SPKO' . YY . MM . 001 (Unique ID)
+     * Helper membuat nomor urut SPKO unik berformat 'SPKO{yy}{mm}{001}'.
+     * Menghitung nomor urut tertinggi secara akurat dan mendukung pessimistic lock untuk mencegah race condition.
      */
-    protected function generateSpkoNumber(string $dateString): string
+    protected function generateSpkoNumber(string $dateString, bool $lock = false): string
     {
         $date = Carbon::parse($dateString);
         $prefix = 'SPKO' . $date->format('y') . $date->format('m');
 
-        $latestSpko = WorkAllocation::where('SW', 'LIKE', "{$prefix}%")
-            ->orderBy('SW', 'desc')
-            ->value('SW');
-
-        if ($latestSpko && preg_match('/^' . preg_quote($prefix, '/') . '(\d{3,})$/', $latestSpko, $matches)) {
-            $nextSequence = ((int) $matches[1]) + 1;
-        } else {
-            $nextSequence = 1;
+        $query = WorkAllocation::where('SW', 'LIKE', "{$prefix}%");
+        if ($lock) {
+            $query->lockForUpdate();
         }
 
+        $existingNumbers = $query->pluck('SW');
+
+        $maxSequence = 0;
+        foreach ($existingNumbers as $sw) {
+            if (preg_match('/^' . preg_quote($prefix, '/') . '(\d+)$/', $sw, $matches)) {
+                $seq = (int) $matches[1];
+                if ($seq > $maxSequence) {
+                    $maxSequence = $seq;
+                }
+            }
+        }
+
+        $nextSequence = $maxSequence + 1;
         return $prefix . str_pad((string) $nextSequence, 3, '0', STR_PAD_LEFT);
     }
 
     /**
      * Helper membuat Numeric ID unik 12 digit untuk tabel workallocation/workcompletion.
-     * Mengikuti pola referensi data: {YY}{MM}{DD}{SEQ:4}
+     * Mengikuti pola referensi data: {YY}{MM}{DD}{SEQ:4}01 dengan pessimistic lock.
      */
-    protected function generateNumericId(Carbon $date): int
+    protected function generateNumericId(Carbon $date, bool $lock = false): int
     {
         $datePrefix = $date->format('ymd');
-        $randomSeq = str_pad((string) random_int(1, 9999), 4, '0', STR_PAD_LEFT);
-        $candidate = (int) ($datePrefix . $randomSeq . '01');
 
-        while (WorkAllocation::where('ID', $candidate)->exists()) {
+        do {
             $randomSeq = str_pad((string) random_int(1, 9999), 4, '0', STR_PAD_LEFT);
             $candidate = (int) ($datePrefix . $randomSeq . '01');
-        }
+
+            $waQuery = WorkAllocation::where('ID', $candidate);
+            $wcQuery = WorkCompletion::where('ID', $candidate);
+
+            if ($lock) {
+                $waQuery->lockForUpdate();
+                $wcQuery->lockForUpdate();
+            }
+
+            $exists = $waQuery->exists() || $wcQuery->exists();
+        } while ($exists);
 
         return $candidate;
     }

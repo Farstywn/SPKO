@@ -34,12 +34,26 @@
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
                 <!-- No SPKO -->
                 <div>
-                    <label class="block text-xs font-semibold text-slate-700 mb-1.5">
-                        Nomor SPKO <span class="text-rose-500">*</span>
-                    </label>
-                    <input type="text" name="spko_no" id="spko_no" value="{{ old('spko_no', $suggestedSpkoNo) }}" required
-                        class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm font-mono font-medium focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-600 bg-slate-50/50">
-                    <span class="text-[11px] text-slate-400 mt-1 block">Format: SPKO{yy}{mm}{001} unik</span>
+                    <div class="flex items-center justify-between mb-1.5">
+                        <label class="block text-xs font-semibold text-slate-700">
+                            Nomor SPKO <span class="text-rose-500">*</span>
+                        </label>
+                        <span class="inline-flex items-center gap-1 text-[10px] font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
+                            <i class="fa-solid fa-shield-halved text-[9px]"></i> Anti-Duplikat
+                        </span>
+                    </div>
+                    <div class="relative">
+                        <input type="text" name="spko_no" id="spko_no" value="{{ old('spko_no', $suggestedSpkoNo) }}" required
+                            class="w-full pl-3.5 pr-10 py-2.5 rounded-xl border border-slate-300 text-sm font-mono font-medium focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-600 bg-slate-50/50">
+                        <button type="button" id="btnRefreshSpkoNo" title="Segarkan nomor urut terbaru dari server"
+                            class="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-emerald-600 transition p-1 rounded-lg hover:bg-slate-100">
+                            <i class="fa-solid fa-arrows-rotate text-xs" id="iconRefreshSpko"></i>
+                        </button>
+                    </div>
+                    <span class="text-[11px] text-slate-400 mt-1 flex items-center gap-1">
+                        <i class="fa-solid fa-circle-info text-[10px] text-slate-400"></i>
+                        Otomatis diamankan saat simpan agar tidak bentrok jika operator lain input bersamaan.
+                    </span>
                 </div>
 
                 <!-- Tanggal Transaksi -->
@@ -255,6 +269,33 @@
                 alert('Transaksi minimal memiliki 1 baris item produk!');
             }
         });
+
+        // Event: Segarkan nomor SPKO saat tanggal transaksi diubah atau tombol reload diklik
+        function fetchSuggestedSpkoNo() {
+            const transDate = $('#trans_date').val();
+            if (!transDate) return;
+
+            const icon = $('#iconRefreshSpko');
+            icon.addClass('fa-spin text-emerald-600');
+
+            $.ajax({
+                url: "{{ route('spko.suggest_number') }}",
+                type: 'GET',
+                data: { trans_date: transDate },
+                dataType: 'json',
+                success: function(res) {
+                    if (res.status === 'success' && res.suggested_no) {
+                        $('#spko_no').val(res.suggested_no);
+                    }
+                },
+                complete: function() {
+                    setTimeout(() => icon.removeClass('fa-spin text-emerald-600'), 400);
+                }
+            });
+        }
+
+        $('#trans_date').on('change', fetchSuggestedSpkoNo);
+        $('#btnRefreshSpkoNo').on('click', fetchSuggestedSpkoNo);
 
         addRow();
     });

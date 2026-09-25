@@ -11,20 +11,22 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('workallocation', function (Blueprint $table) {
-            $table->bigInteger('ID')->primary();
-            $table->text('Remarks')->nullable();
-            $table->integer('Employee');
-            $table->date('TransDate');
-            $table->string('Process', 10);
-            $table->string('SW', 25);
+        if (!Schema::hasTable('workallocation')) {
+            Schema::create('workallocation', function (Blueprint $table) {
+                $table->bigInteger('ID')->primary();
+                $table->text('Remarks')->nullable();
+                $table->integer('Employee');
+                $table->date('TransDate');
+                $table->string('Process', 10);
+                $table->string('SW', 25);
 
-            $table->foreign('Employee')
-                ->references('Id_employee')
-                ->on('employee')
-                ->onUpdate('cascade')
-                ->onDelete('restrict');
-        });
+                $table->foreign('Employee')
+                    ->references('Id_employee')
+                    ->on('employee')
+                    ->onUpdate('cascade')
+                    ->onDelete('restrict');
+            });
+        }
     }
 
     /**

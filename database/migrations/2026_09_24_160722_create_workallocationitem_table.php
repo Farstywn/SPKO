@@ -11,27 +11,29 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('workallocationitem', function (Blueprint $table) {
-            $table->bigInteger('IDM');
-            $table->integer('Ordinal');
-            $table->integer('Qty');
-            $table->decimal('Weight', 15, 2);
-            $table->integer('FG');
+        if (!Schema::hasTable('workallocationitem')) {
+            Schema::create('workallocationitem', function (Blueprint $table) {
+                $table->bigInteger('IDM');
+                $table->integer('Ordinal');
+                $table->integer('Qty');
+                $table->decimal('Weight', 15, 2);
+                $table->integer('FG');
 
-            $table->primary(['IDM', 'Ordinal']);
+                $table->primary(['IDM', 'Ordinal']);
 
-            $table->foreign('IDM')
-                ->references('ID')
-                ->on('workallocation')
-                ->onUpdate('cascade')
-                ->onDelete('cascade');
+                $table->foreign('IDM')
+                    ->references('ID')
+                    ->on('workallocation')
+                    ->onUpdate('cascade')
+                    ->onDelete('cascade');
 
-            $table->foreign('FG')
-                ->references('Id_product')
-                ->on('product')
-                ->onUpdate('cascade')
-                ->onDelete('restrict');
-        });
+                $table->foreign('FG')
+                    ->references('Id_product')
+                    ->on('product')
+                    ->onUpdate('cascade')
+                    ->onDelete('restrict');
+            });
+        }
     }
 
     /**

@@ -11,13 +11,15 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('product', function (Blueprint $table) {
-            $table->integer('Id_product')->primary();
-            $table->string('sub_category', 20);
-            $table->integer('serial_no');
-            $table->string('description', 255);
-            $table->string('carat', 10);
-        });
+        if (!Schema::hasTable('product')) {
+            Schema::create('product', function (Blueprint $table) {
+                $table->integer('Id_product')->primary();
+                $table->string('sub_category', 20);
+                $table->integer('serial_no');
+                $table->string('description', 255);
+                $table->string('carat', 10);
+            });
+        }
     }
 
     /**
