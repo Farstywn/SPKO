@@ -1,0 +1,335 @@
+{% extends "base.html" %} {% block title %}Informasi Selisih Berat per Produk
+(FG){% endblock %} {% block content %}
+<div class="space-y-6">
+    <!-- Header & Filter Section -->
+    <div
+        class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4"
+    >
+        <div>
+            <h1 class="text-2xl font-bold text-slate-900 tracking-tight">
+                Analisis Selisih Berat per Produk (FG)
+            </h1>
+            <p class="text-sm text-slate-500 mt-1">
+                Membandingkan bobot barang yang ditugaskan pada SPKO
+                (workallocation) dengan barang yang diserahterimakan pada Nota
+                Terima (workcompletion).
+            </p>
+        </div>
+
+        <!-- Filter Form -->
+        <div class="pt-4 border-t border-slate-100">
+            <form
+                method="GET"
+                action="{{ url_for('index') }}"
+                id="filterForm"
+                class="flex flex-wrap items-center gap-2.5"
+            >
+                <span class="text-xs font-semibold text-slate-700"
+                    >Kategori:</span
+                >
+                <select
+                    name="category"
+                    id="filter_category"
+                    class="px-3 py-1.5 rounded-xl border border-slate-300 text-xs bg-white text-slate-700 focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-600 shadow-sm"
+                >
+                    <option value="">-- Semua Kategori --</option>
+                    {% for cat in categories %}
+                    <option
+                        value="{{ cat }}"
+                        {%
+                        if
+                        selected_category=""
+                        ="cat"
+                        %}selected{%
+                        endif
+                        %}
+                    >
+                        {{ cat }}
+                    </option>
+                    {% endfor %}
+                </select>
+
+                <span class="text-xs font-semibold text-slate-700 sm:ml-2"
+                    >Cari Produk:</span
+                >
+                <input
+                    type="text"
+                    name="search"
+                    id="filter_search"
+                    value="{{ search_keyword }}"
+                    placeholder="Ketik nama atau kode FG..."
+                    class="px-3 py-1.5 rounded-xl border border-slate-300 text-xs bg-white text-slate-700 focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-600 shadow-sm w-56"
+                />
+
+                <button
+                    type="submit"
+                    class="px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold text-xs shadow-sm transition flex items-center gap-1.5"
+                >
+                    <i class="fa-solid fa-filter text-xs"></i>
+                    Filter
+                </button>
+                {% if selected_category or search_keyword %}
+                <a
+                    href="{{ url_for('index') }}"
+                    class="px-3.5 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-slate-600 text-xs font-medium transition flex items-center gap-1"
+                >
+                    <i class="fa-solid fa-arrow-rotate-left text-xs"></i>
+                    Reset
+                </a>
+                {% endif %}
+            </form>
+        </div>
+    </div>
+
+    <!-- Summary Metrics Cards -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <!-- Card 1 -->
+        <div
+            class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-1"
+        >
+            <div
+                class="text-xs font-semibold text-slate-400 uppercase tracking-wider"
+            >
+                Total Bobot SPKO
+            </div>
+            <div class="text-2xl font-bold text-slate-900 font-mono">
+                {{ "{:,.2f}".format(summary.total_spko_weight) }}
+                <span class="text-sm font-normal text-slate-500">Gr</span>
+            </div>
+            <div class="text-xs text-slate-500">
+                Dari total {{ "{:,}".format(summary.total_spko_qty) }} pcs
+                produk dialokasikan
+            </div>
+        </div>
+
+        <!-- Card 2 -->
+        <div
+            class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-1"
+        >
+            <div
+                class="text-xs font-semibold text-slate-400 uppercase tracking-wider"
+            >
+                Total Bobot NTHKO
+            </div>
+            <div class="text-2xl font-bold text-slate-900 font-mono">
+                {{ "{:,.2f}".format(summary.total_nthko_weight) }}
+                <span class="text-sm font-normal text-slate-500">Gr</span>
+            </div>
+            <div class="text-xs text-slate-500">
+                Dari total {{ "{:,}".format(summary.total_nthko_qty) }} pcs
+                produk selesai
+            </div>
+        </div>
+
+        <!-- Card 3 -->
+        <div
+            class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-1"
+        >
+            <div
+                class="text-xs font-semibold text-slate-400 uppercase tracking-wider"
+            >
+                Total Selisih Berat
+            </div>
+            <div class="text-2xl font-bold text-amber-600 font-mono">
+                +{{ "{:,.2f}".format(summary.total_weight_diff) }}
+                <span class="text-sm font-normal text-slate-500">Gr</span>
+            </div>
+            <div class="text-xs text-slate-500">
+                Susut produksi (scrap & serbuk poles/brush)
+            </div>
+        </div>
+
+        <!-- Card 4 -->
+        <div
+            class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-1"
+        >
+            <div
+                class="text-xs font-semibold text-slate-400 uppercase tracking-wider"
+            >
+                Rasio Susut / Shrinkage
+            </div>
+            <div class="text-2xl font-bold text-rose-600 font-mono">
+                {{ "{:.2f}".format(summary.shrinkage_percentage) }}%
+            </div>
+            <div class="text-xs text-slate-500">
+                Recovery rate: {{ "{:.2f}".format(100 -
+                summary.shrinkage_percentage) }}%
+            </div>
+        </div>
+    </div>
+
+    <!-- Product Table Card -->
+    <div
+        class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden"
+    >
+        <div
+            class="px-6 py-4 border-b border-slate-200 flex justify-between items-center"
+        >
+            <h2 class="font-bold text-slate-900 text-base">
+                Tabel Selisih Berat per Produk (FG)
+            </h2>
+            <span
+                class="text-xs font-semibold px-2.5 py-1 rounded-lg bg-slate-100 text-slate-700"
+            >
+                {{ products|length }} Master Produk
+            </span>
+        </div>
+
+        <div class="overflow-x-auto">
+            <table class="w-full text-left text-sm text-slate-600">
+                <thead
+                    class="bg-slate-50 text-xs uppercase font-semibold text-slate-700 border-b border-slate-200"
+                >
+                    <tr>
+                        <th class="px-5 py-3.5 whitespace-nowrap">Kode FG</th>
+                        <th class="px-5 py-3.5 min-w-[220px]">
+                            Deskripsi Produk
+                        </th>
+                        <th class="px-5 py-3.5 whitespace-nowrap">
+                            Kategori / Carat
+                        </th>
+                        <th class="px-5 py-3.5 text-right whitespace-nowrap">
+                            Qty (SPKO / NTHKO)
+                        </th>
+                        <th class="px-5 py-3.5 text-right whitespace-nowrap">
+                            Berat SPKO (Gr)
+                        </th>
+                        <th class="px-5 py-3.5 text-right whitespace-nowrap">
+                            Berat NTHKO (Gr)
+                        </th>
+                        <th class="px-5 py-3.5 text-right whitespace-nowrap">
+                            Selisih Berat (Gr)
+                        </th>
+                        <th class="px-5 py-3.5 text-center whitespace-nowrap">
+                            Status Susut
+                        </th>
+                        <th class="px-5 py-3.5 text-center whitespace-nowrap">
+                            Aksi
+                        </th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100">
+                    {% for p in products %} {% set diff = p.selisih_berat|float
+                    %} {% set spko_wt = p.berat_spko|float %} {% set loss_pct =
+                    (diff / spko_wt * 100) if spko_wt > 0 else 0 %}
+                    <tr class="hover:bg-slate-50/60 transition">
+                        <td
+                            class="px-5 py-3.5 font-mono font-bold text-slate-900 whitespace-nowrap"
+                        >
+                            {{ p.fg }}
+                        </td>
+                        <td class="px-5 py-3.5 min-w-[220px]">
+                            <div
+                                class="font-medium text-slate-900 leading-snug"
+                            >
+                                {{ p.description }}
+                            </div>
+                            <div
+                                class="text-xs text-slate-400 font-mono mt-0.5"
+                            >
+                                SN: {{ p.serial_no }}
+                            </div>
+                        </td>
+                        <td class="px-5 py-3.5 whitespace-nowrap">
+                            <div class="flex flex-col gap-1 items-start">
+                                <span
+                                    class="px-2 py-0.5 rounded text-xs font-semibold bg-slate-100 text-slate-700 whitespace-nowrap"
+                                >
+                                    {{ p.sub_category }}
+                                </span>
+                                <span
+                                    class="px-2 py-0.5 rounded text-xs font-medium bg-amber-50 text-amber-800 border border-amber-200 whitespace-nowrap font-mono"
+                                >
+                                    {{ p.carat }}
+                                </span>
+                            </div>
+                        </td>
+                        <td
+                            class="px-5 py-3.5 text-right font-medium whitespace-nowrap"
+                        >
+                            <span class="text-emerald-700 font-semibold"
+                                >{{ "{:,}".format(p.qty_spko) }}</span
+                            >
+                            <span class="text-slate-400 mx-1">/</span>
+                            <span class="text-sky-700 font-semibold"
+                                >{{ "{:,}".format(p.qty_nthko) }}</span
+                            >
+                        </td>
+                        <td
+                            class="px-5 py-3.5 text-right font-mono font-medium text-slate-900 whitespace-nowrap"
+                        >
+                            {{ "{:,.2f}".format(p.berat_spko) }}
+                        </td>
+                        <td
+                            class="px-5 py-3.5 text-right font-mono font-medium text-slate-900 whitespace-nowrap"
+                        >
+                            {{ "{:,.2f}".format(p.berat_nthko) }}
+                        </td>
+                        <td
+                            class="px-5 py-3.5 text-right font-mono whitespace-nowrap font-bold {% if diff > 0 %}text-amber-600{% elif diff < 0 %}text-rose-600{% else %}text-emerald-600{% endif %}"
+                        >
+                            <div>
+                                {% if diff > 0 %}+{% endif %}{{
+                                "{:,.2f}".format(diff) }}
+                            </div>
+                            <span class="text-[11px] font-normal text-slate-400"
+                                >({{ "{:.1f}".format(loss_pct) }}%)</span
+                            >
+                        </td>
+                        <td class="px-5 py-3.5 text-center whitespace-nowrap">
+                            {% if diff > 20 %}
+                            <span
+                                class="px-2.5 py-1 rounded-full text-xs font-semibold bg-rose-50 text-rose-700 border border-rose-200 inline-block whitespace-nowrap"
+                            >
+                                Perhatian Khusus
+                            </span>
+                            {% elif diff > 0 %}
+                            <span
+                                class="px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200 inline-block whitespace-nowrap"
+                            >
+                                Susut Normal
+                            </span>
+                            {% else %}
+                            <span
+                                class="px-2.5 py-1 rounded-full text-xs font-semibold bg-slate-100 text-slate-600 inline-block whitespace-nowrap"
+                            >
+                                Sesuai / Nihil
+                            </span>
+                            {% endif %}
+                        </td>
+                        <td class="px-5 py-3.5 text-center whitespace-nowrap">
+                            <a
+                                href="{{ url_for('detail', fg_id=p.fg) }}"
+                                title="Lihat Rincian Transaksi FG"
+                                class="w-8 h-8 inline-flex items-center justify-center rounded-lg text-slate-500 hover:text-indigo-700 hover:bg-indigo-50 border border-slate-200 hover:border-indigo-300 transition"
+                            >
+                                <i class="fa-solid fa-eye text-sm"></i>
+                            </a>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="9" class="text-center py-8 text-slate-400">
+                            Tidak ada data produk yang sesuai kriteria
+                            pencarian.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %} {% block scripts %}
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const form = document.getElementById("filterForm");
+        const categorySelect = document.getElementById("filter_category");
+        if (categorySelect && form) {
+            categorySelect.addEventListener("change", function () {
+                form.submit();
+            });
+        }
+    });
+</script>
+{% endblock %}

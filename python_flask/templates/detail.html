@@ -1,0 +1,154 @@
+{% extends "base.html" %} {% block title %}Rincian Transaksi FG {{
+product.Id_product }}{% endblock %} {% block content %}
+<div class="w-full space-y-6">
+    <!-- Breadcrumb & Title -->
+    <div
+        class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4"
+    >
+        <div>
+            <div class="flex items-center gap-2 text-xs text-slate-500 mb-1">
+                <a href="{{ url_for('index') }}" class="hover:text-amber-600"
+                    >Selisih Berat FG</a
+                >
+                <span>/</span>
+                <span class="text-slate-800 font-medium"
+                    >Rincian Transaksi</span
+                >
+            </div>
+            <h1
+                class="text-2xl font-bold text-slate-900 tracking-tight flex items-center gap-3"
+            >
+                <span>{{ product.description }}</span>
+                <span
+                    class="text-xs font-semibold px-2.5 py-1 rounded-full bg-amber-100 text-amber-900 font-mono"
+                >
+                    FG: {{ product.Id_product }}
+                </span>
+            </h1>
+            <p class="text-sm text-slate-500">
+                Kategori:
+                <strong class="text-slate-700"
+                    >{{ product.sub_category }}</strong
+                >
+                &bull; Kadar:
+                <strong class="text-slate-700">{{ product.carat }}</strong>
+                &bull; Serial No:
+                <span class="font-mono text-slate-700"
+                    >{{ product.serial_no }}</span
+                >
+            </p>
+        </div>
+        <a
+            href="{{ url_for('index') }}"
+            class="px-4 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-slate-700 text-sm font-medium transition"
+        >
+            Kembali ke Dashboard
+        </a>
+    </div>
+
+    <!-- Transaction List Card -->
+    <div
+        class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden"
+    >
+        <div
+            class="px-6 py-4 border-b border-slate-200 flex justify-between items-center"
+        >
+            <h2 class="font-bold text-slate-900 text-base">
+                Histori Pengerjaan SPKO & NTHKO
+            </h2>
+            <span
+                class="text-xs font-semibold px-2.5 py-1 rounded-lg bg-slate-100 text-slate-700"
+            >
+                {{ transactions|length }} Transaksi
+            </span>
+        </div>
+
+        <div class="overflow-x-auto">
+            <table class="w-full text-left text-sm text-slate-600">
+                <thead
+                    class="bg-slate-50 text-xs uppercase font-semibold text-slate-700 border-b border-slate-200"
+                >
+                    <tr>
+                        <th class="px-6 py-3.5">No. SPKO</th>
+                        <th class="px-6 py-3.5">Tanggal SPKO</th>
+                        <th class="px-6 py-3.5">Operator</th>
+                        <th class="px-6 py-3.5">Proses</th>
+                        <th class="px-6 py-3.5 text-right">
+                            Qty (SPKO / NTHKO)
+                        </th>
+                        <th class="px-6 py-3.5 text-right">Berat SPKO (Gr)</th>
+                        <th class="px-6 py-3.5 text-right">Berat NTHKO (Gr)</th>
+                        <th class="px-6 py-3.5 text-right">
+                            Selisih Berat (Gr)
+                        </th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100">
+                    {% for t in transactions %} {% set diff =
+                    (t.berat_spko|float) - (t.berat_nthko|float) %}
+                    <tr class="hover:bg-slate-50/60 transition">
+                        <td
+                            class="px-6 py-3.5 font-mono font-bold text-slate-900"
+                        >
+                            {{ t.no_spko }}
+                            <span
+                                class="block text-[11px] font-normal text-slate-400"
+                                >Ord: {{ t.ordinal }}</span
+                            >
+                        </td>
+                        <td
+                            class="px-6 py-3.5 whitespace-nowrap text-slate-700"
+                        >
+                            {{ t.tgl_spko.strftime('%d/%m/%Y') if t.tgl_spko
+                            else '-' }}
+                        </td>
+                        <td class="px-6 py-3.5 font-medium text-slate-900">
+                            {{ t.nama_operator }}
+                        </td>
+                        <td class="px-6 py-3.5">
+                            <span
+                                class="px-2 py-0.5 rounded text-xs font-semibold bg-slate-100 text-slate-700"
+                            >
+                                {{ t.proses }}
+                            </span>
+                        </td>
+                        <td class="px-6 py-3.5 text-right font-medium">
+                            <span class="text-emerald-700"
+                                >{{ t.qty_spko }}</span
+                            >
+                            <span class="text-slate-400 mx-1">/</span>
+                            <span class="text-sky-700"
+                                >{{ t.qty_nthko or '-' }}</span
+                            >
+                        </td>
+                        <td
+                            class="px-6 py-3.5 text-right font-mono font-medium text-slate-900"
+                        >
+                            {{ "{:,.2f}".format(t.berat_spko|float) }}
+                        </td>
+                        <td
+                            class="px-6 py-3.5 text-right font-mono font-medium text-slate-900"
+                        >
+                            {{ "{:,.2f}".format(t.berat_nthko|float) if
+                            t.berat_nthko is not none else '-' }}
+                        </td>
+                        <td
+                            class="px-6 py-3.5 text-right font-mono font-bold {% if diff > 0 %}text-amber-600{% elif diff < 0 %}text-rose-600{% else %}text-emerald-600{% endif %}"
+                        >
+                            {% if diff > 0 %}+{% endif %}{{
+                            "{:,.2f}".format(diff) }}
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="8" class="text-center py-8 text-slate-400">
+                            Belum ada riwayat transaksi SPKO untuk produk ini.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
