@@ -34,18 +34,31 @@
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
                 <!-- No SPKO -->
                 <div>
-                    <label class="block text-xs font-semibold text-slate-700 mb-1.5">
-                        Nomor SPKO <span class="text-rose-500">*</span>
-                    </label>
-                    <div class="relative">
-                        <input type="text" name="spko_no" id="spko_no" value="{{ old('spko_no', $suggestedSpkoNo) }}" required
-                            class="w-full pl-3.5 pr-10 py-2.5 rounded-xl border border-slate-300 text-sm font-mono font-medium focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-600 bg-slate-50/50">
-                        <button type="button" id="btnRefreshSpkoNo" title="Segarkan nomor urut terbaru dari server"
-                            class="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-emerald-600 transition p-1 rounded-lg hover:bg-slate-100">
-                            <i class="fa-solid fa-arrows-rotate text-xs" id="iconRefreshSpko"></i>
-                        </button>
+                    <div class="flex items-center justify-between mb-1.5">
+                        <label class="block text-xs font-semibold text-slate-700">
+                            Nomor SPKO <span class="text-rose-500">*</span>
+                        </label>
+                        <span class="text-[11px] font-mono text-slate-400">Auto-Generated</span>
                     </div>
-                    <span class="text-[11px] text-slate-400 mt-1 block">Format: SPKO{yy}{mm}{001} unik</span>
+                    <div class="relative flex items-center">
+                        <input type="text" name="spko_no" id="spko_no" value="{{ old('spko_no', $suggestedSpkoNo) }}" required readonly
+                            class="w-full pl-3.5 pr-20 py-2.5 rounded-xl border border-slate-300 text-sm font-mono font-bold text-slate-800 bg-slate-100/90 cursor-default focus:outline-none transition">
+                        <div class="absolute right-1.5 flex items-center gap-0.5">
+                            <button type="button" id="btnToggleManualSpko" title="Klik untuk membuka kunci jika ingin ketik nomor manual"
+                                class="text-xs px-2 py-1 rounded-lg text-slate-500 hover:text-slate-800 hover:bg-slate-200/70 transition flex items-center gap-1">
+                                <i class="fa-solid fa-lock text-xs text-slate-400" id="iconLockSpko"></i>
+                                <span class="text-[11px] font-sans font-medium text-slate-600" id="textLockSpko">Kunci</span>
+                            </button>
+                            <button type="button" id="btnRefreshSpkoNo" title="Segarkan nomor urut terbaru dari server"
+                                class="text-slate-400 hover:text-emerald-600 transition p-1.5 rounded-lg hover:bg-slate-200/70">
+                                <i class="fa-solid fa-arrows-rotate text-xs" id="iconRefreshSpko"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <p class="text-[11px] text-emerald-700 mt-1.5 flex items-center gap-1.5 font-medium leading-tight">
+                        <i class="fa-solid fa-circle-check text-emerald-600 text-[11px] shrink-0"></i>
+                        <span>Otomatis diamankan saat simpan agar tidak bentrok jika operator lain input bersamaan.</span>
+                    </p>
                 </div>
 
                 <!-- Tanggal Transaksi -->
@@ -286,7 +299,36 @@
             });
         }
 
-        $('#trans_date').on('change', fetchSuggestedSpkoNo);
+        // Event: Toggle Kunci / Buka input manual nomor SPKO
+        let isManualSpko = false;
+        $('#btnToggleManualSpko').on('click', function() {
+            isManualSpko = !isManualSpko;
+            const input = $('#spko_no');
+            const icon = $('#iconLockSpko');
+            const text = $('#textLockSpko');
+
+            if (isManualSpko) {
+                input.prop('readonly', false)
+                    .removeClass('bg-slate-100/90 cursor-default text-slate-800')
+                    .addClass('bg-white cursor-text text-slate-900 border-amber-400 ring-2 ring-amber-400/20')
+                    .focus();
+                icon.removeClass('fa-lock text-slate-400').addClass('fa-lock-open text-amber-600');
+                text.text('Buka').addClass('text-amber-700 font-semibold');
+            } else {
+                input.prop('readonly', true)
+                    .removeClass('bg-white cursor-text text-slate-900 border-amber-400 ring-2 ring-amber-400/20')
+                    .addClass('bg-slate-100/90 cursor-default text-slate-800');
+                icon.removeClass('fa-lock-open text-amber-600').addClass('fa-lock text-slate-400');
+                text.text('Kunci').removeClass('text-amber-700 font-semibold');
+                fetchSuggestedSpkoNo();
+            }
+        });
+
+        $('#trans_date').on('change', function() {
+            if (!isManualSpko) {
+                fetchSuggestedSpkoNo();
+            }
+        });
         $('#btnRefreshSpkoNo').on('click', fetchSuggestedSpkoNo);
 
         addRow();
